@@ -1,0 +1,45 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Editors
+.vscode/
+.idea/
+*.swp
+
+# Node / pnpm
+node_modules/
+.pnpm-store/
+pnpm-debug.log*
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build output
+dist/
+build/
+.vite/
+*.tsbuildinfo
+
+# Env / secrets
+.env
+.env.*
+!.env.example
+
+# Logs / caches
+*.log
+.cache/
+
+# Figma Make exports (input) — never tracked except the _template/ exemplar.
+# The user drops each export under Figma Make/Projects/<slug>/ on disk only.
+Figma Make/Projects/*
+!Figma Make/Projects/_template/
+
+# Code Conversion Output (output) — generated ports, not tracked.
+# Only the _template/ exemplar (doc standards) is tracked.
+Code Conversion Output/Projects/*
+!Code Conversion Output/Projects/_template/
+
+# Personal process notes (keep under Code Conversion Output/Projects/;
+# never commit a repo-root copy).
+/POST_MORTEM.md
