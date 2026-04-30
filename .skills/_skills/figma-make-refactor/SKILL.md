@@ -12,7 +12,7 @@ dependencies:
   - figma-make-code-review
   - figma-make-type-consolidate
   - figma-make-a11y-modal
-version: "0.1.1"
+version: "0.2.0"
 ---
 
 # figma-make-refactor
@@ -80,8 +80,28 @@ Do not attempt to convert all absolute positioning in one pass. Budget
 
 Mechanical but touches every import site. Do this last.
 
+The rename pass has two jobs:
+
+1. **Strip non-ASCII from filenames.** Make embeds Figma's
+   "release status" emoji into node names — you'll see files like
+   `Banner🟢GeneralAvailability.tsx`,
+   `Tier3ToolPane🚨FlaggedForDeprecation.tsx`,
+   `FlyoutList🟢GeneralAvailability-105-3338.tsx`. These break a
+   non-trivial number of editor features (search-by-path, terminal
+   autocompletion, some test runners) and they look unprofessional
+   in any code review. Strip the emoji and any other non-ASCII
+   characters from filenames as the first sub-pass. If the resulting
+   name collides with a sibling, append a stable suffix (e.g. the
+   trailing `-105-3338` Figma node ID Make already uses).
+2. **Rename Figma-node names to domain names.** `Frame57793154` →
+   `TriggerModal`, `EditMode-2-1` → `ConditionRow`, etc.
+
+Steps:
+
 1. Build the rename map from `chat.txt` (via `figma-make-chat-replay`)
-   and any Figma node names you have. Example:
+   and any Figma node names you have. Examples:
+   `Banner🟢GeneralAvailability.tsx → Banner.tsx`,
+   `Tier3ToolPane🚨FlaggedForDeprecation.tsx → Tier3ToolPane.tsx`,
    `Frame57793154 → TriggerModal`, `EditMode-2-1 → ConditionRow`.
 2. Write the map to `Code Conversion Output/Projects/<slug>/RENAME_MAP.md` so reviewers can
    audit it.

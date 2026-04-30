@@ -14,7 +14,7 @@ dependencies:
   - figma-make-chat-replay
   - figma-make-code-review
   - figma-make-sap72-font
-version: "0.2.0"
+version: "0.3.0"
 ---
 
 # figma-make-import
@@ -25,9 +25,13 @@ can work in productively.
 
 Figma Make files are not fetchable via the Figma API. The user hands you
 a local folder. The F2C convention is to drop it under
-`Figma Make/Projects/<slug>/` (a short kebab-case slug picked by the
-user) and produce the ported output at
-`Code Conversion Output/Projects/<slug>/` — **same slug in both trees**.
+`Figma Make/Projects/<input-name>/` (the user names this anything —
+project title, casual name, even with spaces or emoji) and produce
+the ported output at `Code Conversion Output/Projects/<output-slug>/`
+where `<output-slug>` is the **kebab-ascii** form of the input name
+(see preflight #3). The two trees no longer mirror exactly: the
+input name documents what the user dropped, the output slug serves
+the npm + shell + git toolchain that the port runs against.
 
 The dropped export typically looks like:
 
@@ -63,10 +67,44 @@ Make project into the current workspace — or says "Figma to Cursor",
    are.
 2. **Confirm git state.** If the workspace is not a git repo, ask before
    `git init`. Use `main` as the default branch name.
-3. **Decide destination.** Default is
-   `Code Conversion Output/Projects/<slug>/` — **the same `<slug>` as
-   the input folder**. Keep `Figma Make/Projects/<slug>/` untouched as
-   a read-only source.
+3. **Decide destination — input name preserved, output slug normalized.**
+   The input folder under `Figma Make/Projects/<input-name>/` is
+   whatever the user dropped in (could be `AI Scoring`, could be
+   `Quality Management App`, could have emoji). Leave it alone; that
+   tree is read-only and exists to mirror what Figma Make shipped.
+
+   The destination under `Code Conversion Output/Projects/<output-slug>/`
+   is **always kebab-ascii**: lowercase letters, digits, and hyphens
+   only. No spaces, no uppercase, no emoji, no accents. This is
+   non-negotiable — every shell command, npm `name` field, and CI
+   tool downstream assumes ASCII slugs, and the failures from
+   skipping this rule (the agent's `pwd` reports a different
+   directory than `working_directory`, `xargs` choking, npm rejecting
+   the manifest name, `cd` requiring careful quoting on every call)
+   are exactly the bugs that surface when slugs have spaces.
+
+   **Mapping rule.** Compute the output slug from the input name:
+
+   ```
+   "AI Scoring"               → "ai-scoring"
+   "Quality Management App"   → "quality-management-app"
+   "My Cool Demo (v2)"        → "my-cool-demo-v2"
+   "Survey 🟢 GA"              → "survey-ga"
+   ```
+
+   Lowercase, replace non-ASCII (emoji, accents) with empty string,
+   replace any run of non-`[a-z0-9]` with a single hyphen, trim
+   leading/trailing hyphens. If the result is empty or starts with a
+   digit only, ask the user to pick a slug.
+
+   Show the user the mapping before creating the destination, so they
+   can override if they want a different slug. Record both the input
+   name and output slug in `CONVERSION_NOTES.md` so the source ↔ port
+   linkage is findable later.
+
+   This breaks the prior "same slug in both trees" rule — intentionally.
+   Input name documents what the user dropped; output slug serves the
+   toolchain.
 4. **Package manager is npm — no question asked.** F2C standardizes
    on npm + nvm. Make exports ship `pnpm-workspace.yaml` and sometimes
    a pnpm lockfile; both are Make build-environment artifacts, not
@@ -105,28 +143,48 @@ Track progress with this checklist:
 
 - `cat` / read `package.json`, `vite.config.ts`, `src/main.tsx`,
   `src/app/App.tsx`, `guidelines/Guidelines.md`, and the CSS entry.
-- Note the slug (folder name under `Figma Make/Projects/`).
+- Note the input name (the folder under `Figma Make/Projects/` —
+  preserve as-is).
+- Compute the output slug by normalizing the input name to kebab-ascii
+  (see preflight #3); show the mapping to the user.
 - Look for Make smells before touching anything — see **figma-make-code-review**.
 
 ### Step 2 — Copy templates + source
 
+Use the names from preflight #3:
+
+- `<input-name>` — the folder the user dropped at
+  `Figma Make/Projects/<input-name>/` (whatever they named it).
+- `<output-slug>` — the kebab-ascii destination under
+  `Code Conversion Output/Projects/<output-slug>/`.
+
 Start from the template so the standard doc structure is in place:
 
 ```bash
-cp -R "Code Conversion Output/Projects/_template/" "Code Conversion Output/Projects/<slug>/"
-mv "Code Conversion Output/Projects/<slug>/CONVERSION_NOTES.template.md" "Code Conversion Output/Projects/<slug>/CONVERSION_NOTES.md"
-mv "Code Conversion Output/Projects/<slug>/IMPORT_REPORT.template.md"    "Code Conversion Output/Projects/<slug>/IMPORT_REPORT.md"
-mv "Code Conversion Output/Projects/<slug>/README.template.md"            "Code Conversion Output/Projects/<slug>/README.md"
+cp -R "Code Conversion Output/Projects/_template/" "Code Conversion Output/Projects/<output-slug>/"
+mv "Code Conversion Output/Projects/<output-slug>/CONVERSION_NOTES.template.md" "Code Conversion Output/Projects/<output-slug>/CONVERSION_NOTES.md"
+mv "Code Conversion Output/Projects/<output-slug>/IMPORT_REPORT.template.md"    "Code Conversion Output/Projects/<output-slug>/IMPORT_REPORT.md"
+mv "Code Conversion Output/Projects/<output-slug>/README.template.md"            "Code Conversion Output/Projects/<output-slug>/README.md"
 ```
 
 Then copy the Make export's source files into the same directory:
 
 ```bash
-cp -R "Figma Make/Projects/<slug>/<Human project name>/"* "Code Conversion Output/Projects/<slug>/"
-find "Code Conversion Output/Projects/<slug>" -name ".DS_Store" -delete
+cp -R "Figma Make/Projects/<input-name>/<Human project name>/"* "Code Conversion Output/Projects/<output-slug>/"
+find "Code Conversion Output/Projects/<output-slug>" -name ".DS_Store" -delete
 ```
 
-Never edit the source under `Figma Make/Projects/<slug>/`.
+Note that the Make export's bundled `README.md` will overwrite the
+template's `README.md` — copy the template README back afterwards:
+
+```bash
+cp "Code Conversion Output/Projects/_template/README.template.md" "Code Conversion Output/Projects/<output-slug>/README.md"
+```
+
+Never edit the source under `Figma Make/Projects/<input-name>/`.
+
+The output slug also feeds the npm `package.json` `name` field in
+Step 3 (it's already kebab-ascii, so no further transform is needed).
 
 Note: both `Figma Make/Projects/*` and `Code Conversion Output/Projects/*`
 are git-ignored except their `_template/` exemplars. The exported source
@@ -282,11 +340,13 @@ chore: port <slug> — repo-level updates from Figma Make import
 ## Examples
 
 - "I dropped a Figma Make export in the repo — can you bring it over?"
-  → Run this skill end-to-end. Confirm the slug under
-  `Figma Make/Projects/`.
-- "Port `Figma Make/Projects/my-app/MyApp` into this workspace."
-  → Destination = `Code Conversion Output/Projects/my-app/`, follow the
-  8-step checklist.
+  → Run this skill end-to-end. Confirm the input folder name under
+  `Figma Make/Projects/`, derive the kebab-ascii output slug, show
+  the user the mapping before creating anything.
+- "Port `Figma Make/Projects/My Cool Demo/MyCoolDemo` into this workspace."
+  → Input name = `My Cool Demo`, output slug = `my-cool-demo`.
+  Destination = `Code Conversion Output/Projects/my-cool-demo/`,
+  follow the 8-step checklist.
 
 ## See also
 

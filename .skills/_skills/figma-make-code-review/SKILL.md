@@ -9,7 +9,7 @@ triggers:
   - figma make bugs
   - figma make typecheck
 dependencies: []
-version: "0.1.1"
+version: "0.1.2"
 ---
 
 # figma-make-code-review
@@ -66,6 +66,14 @@ Manifest deltas
 - [ ] SAP "72" font references without bundled fonts — if `font-['72:`
       appears anywhere under `src/`, the **figma-make-sap72-font** skill
       should have wired it in. If not, this is an R-item.
+- [ ] **Emoji and non-ASCII in filenames.** Make bakes Figma "release
+      status" emoji into node names (`Banner🟢GeneralAvailability.tsx`,
+      `Tier3ToolPane🚨FlaggedForDeprecation.tsx`). Always an R-item;
+      stripping happens in the **figma-make-refactor** rename pass,
+      not at port time. Detect with:
+      ```bash
+      find src -type f -name '*.tsx' | LC_ALL=C grep -P "[^\x00-\x7F]" | wc -l
+      ```
 ```
 
 ## How to run each check

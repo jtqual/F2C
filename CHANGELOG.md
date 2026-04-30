@@ -29,6 +29,26 @@ git checkout clone-me && git merge --ff-only vX.Y.Z && git push
 
 ## [Unreleased]
 
+### Changed
+- **Slug rule clarified.** Input folder under `Figma Make/Projects/`
+  keeps whatever name the user dropped (spaces, mixed case, even
+  emoji); output slug under `Code Conversion Output/Projects/` is
+  **always kebab-ascii**. The two trees no longer mirror exactly —
+  intentional — because shell/npm/CI pain from spaces and emoji in
+  output paths was recurring. `figma-make-import` preflight #3
+  enforces this with an explicit input-name → output-slug mapping
+  shown to the user before anything is created. AGENTS.md
+  Conventions block updated; existing ports are not retroactively
+  renamed.
+- **Refactor rename pass strips non-ASCII from filenames.** Make
+  embeds Figma release-status emoji into node names
+  (`Banner🟢GeneralAvailability.tsx`,
+  `Tier3ToolPane🚨FlaggedForDeprecation.tsx`); these are always an
+  R-item in the code review and always stripped during the rename
+  sub-pass of `figma-make-refactor`. Not stripped at port time
+  because the rename freeze still applies until typecheck is green
+  and a visual baseline exists.
+
 ### Added
 - New skill: `language` — voice/register guidance, always-on, governs
   *how* the agent talks (not *what* it does). Audience baseline is

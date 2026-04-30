@@ -44,8 +44,19 @@ ecosystem harness blocks into this file for this repository.
 ## Conventions
 
 - **Source exports are read-only.** Never edit anything under
-  `Figma Make/Projects/<slug>/`. Copy to
-  `Code Conversion Output/Projects/<slug>/` first, edit there.
+  `Figma Make/Projects/<input-name>/`. Copy to
+  `Code Conversion Output/Projects/<output-slug>/` first, edit there.
+- **Slug rule.** The input folder name under `Figma Make/Projects/`
+  is whatever the user dropped (`AI Scoring`, `Quality Management App`,
+  even with emoji). The output slug under
+  `Code Conversion Output/Projects/` is **always kebab-ascii**:
+  lowercase letters, digits, hyphens. Spaces, uppercase, emoji, and
+  accents are forbidden in the output slug — every shell command,
+  npm `name` field, and CI tool downstream assumes ASCII slugs, and
+  the bugs from skipping this rule (mis-routed `cd`, broken `xargs`,
+  npm rejecting the manifest) are recurring. Compute the mapping in
+  `figma-make-import` preflight #3 and record both names in
+  `CONVERSION_NOTES.md`.
 - **Both `Projects/` trees are git-ignored** (except their
   `_template/` exemplars). Exports and ports live on disk but are not
   committed — they're per-machine working content. The templates
