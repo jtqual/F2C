@@ -97,7 +97,9 @@ This doc has two parts:
     R_  Accessibility gaps (modal, keyboard, screen reader)
     R_  Formatter quirks (leading blank lines, double indent)
     R_  Real TypeScript errors (paste tsc output verbatim)
-    R_  pnpm-workspace.yaml in a single-package project
+    R_  Stale pnpm artifacts (pnpm-workspace.yaml, pnpm-lock.yaml,
+        pnpm.overrides) — F2C ports run on npm; these should be
+        removed during the port and called out as "fixed on port"
 
   Group cosmetic findings under one item at the end.
 -->

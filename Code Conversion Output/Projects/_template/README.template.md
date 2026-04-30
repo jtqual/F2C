@@ -10,25 +10,21 @@ export; make changes here.
 - Vite {{VERSION}} + React {{VERSION}} + TypeScript
 - Tailwind CSS v4 (via `@tailwindcss/vite`)
 - shadcn/ui components under `src/app/components/ui/`
-- Figma-node-generated components under `src/imports/<NodeName>/`
+- Figma-node-generated components under `src/app/imports/<NodeName>/`
 
 ## Dev
 
 ```bash
-{{PACKAGE_MANAGER}} install
-{{PACKAGE_MANAGER}} dev          # → http://localhost:5173/
-{{PACKAGE_MANAGER}} typecheck    # tsc --noEmit
-{{PACKAGE_MANAGER}} build        # production build
+npm install
+npm run dev          # → http://localhost:5173/
+npm run typecheck    # tsc --noEmit
+npm run build        # production build
 ```
 
-<!--
-  Adjust the package manager command above based on the project's lockfile:
-    pnpm-lock.yaml → pnpm
-    package-lock.json → npm
-    yarn.lock → yarn
--->
-
-Node {{NODE_VERSION}} is pinned via `.node-version` (mise).
+Node {{NODE_VERSION}} is pinned via `.node-version` (read by both nvm
+and mise). F2C standardizes on **npm + nvm**; if you see a
+`pnpm-workspace.yaml` or `pnpm-lock.yaml` in the source export, it's a
+Make build-environment artifact and is removed during the port.
 
 ## Docs
 

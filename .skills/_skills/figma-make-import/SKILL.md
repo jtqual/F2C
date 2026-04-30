@@ -13,7 +13,8 @@ triggers:
 dependencies:
   - figma-make-chat-replay
   - figma-make-code-review
-version: "0.1.0"
+  - figma-make-sap72-font
+version: "0.2.0"
 ---
 
 # figma-make-import
@@ -66,13 +67,24 @@ Make project into the current workspace — or says "Figma to Cursor",
    `Code Conversion Output/Projects/<slug>/` — **the same `<slug>` as
    the input folder**. Keep `Figma Make/Projects/<slug>/` untouched as
    a read-only source.
-4. **Pick a package manager by your environment rules.** Honor any
-   project-level rules first. If none, apply the usual lockfile rule
-   (`package-lock.json`→npm, `pnpm-lock.yaml`→pnpm, `yarn.lock`→yarn,
-   none→npm). Figma Make ships `pnpm-workspace.yaml` but no lockfile —
-   ask the user if there's ambiguity.
-5. **Confirm runtime.** Node 20 LTS or 24 LTS is safe. Drop a
-   `.node-version` matching the user's global pin.
+4. **Package manager is npm — no question asked.** F2C standardizes
+   on npm + nvm. Make exports ship `pnpm-workspace.yaml` and sometimes
+   a pnpm lockfile; both are Make build-environment artifacts, not
+   signals. Always:
+   - Use `npm install` / `npm run dev` / `npm run typecheck` etc.
+   - Delete `pnpm-workspace.yaml` and any `pnpm-lock.yaml` during the
+     port (note in CONVERSION_NOTES.md §"Summary of changes").
+   - Strip the `pnpm.overrides` block from `package.json`.
+
+   **Only ask the user about package manager if there's a hard block** —
+   e.g. the project genuinely needs pnpm workspace protocol (`workspace:*`),
+   pnpm-specific hoisting, or the user explicitly says "use pnpm" up
+   front. In that case, document the exception in `CONVERSION_NOTES.md`.
+   Most users will not know to ask, so don't prompt them by default.
+
+5. **Confirm runtime.** Node 24 LTS (matching the F2C default) is the
+   right answer. Drop a `.node-version` containing the version string
+   (e.g. `24.15.0`); both nvm and mise read this file.
 
 ## Port workflow
 
@@ -129,10 +141,20 @@ Figma Make's default `package.json` is wrong for a real app:
 - `react` and `react-dom` are under `peerDependencies` with
   `peerDependenciesMeta.*.optional: true`. Move them to `dependencies`.
 - Drop `peerDependencies`/`peerDependenciesMeta` entirely.
+- Drop the `pnpm.overrides` block (npm doesn't read it).
+- If Make duplicate-keyed every dep as `"foo": "1.2.3", "foo@1.2.3": "npm:foo@1.2.3"`
+  (an artifact of the `@aikidosec/safe-chain` proxy), collapse each
+  pair to a single normal entry.
 - Add `devDependencies`: `typescript`, `@types/react`, `@types/react-dom`.
 - Add `scripts.typecheck`: `"tsc --noEmit"`.
 - Keep `scripts.dev` (`vite`) and `scripts.build` (`vite build`); add
   `scripts.preview` (`vite preview`).
+
+Also delete sibling files at the project root that Make ships but npm
+doesn't use:
+
+- `pnpm-workspace.yaml`
+- `pnpm-lock.yaml` (if present)
 
 Do **not** remove unused deps yet (MUI, emotion, popperjs, etc.). Flag
 them in `CONVERSION_NOTES.md` and let the first refactor pass trim.
@@ -158,15 +180,42 @@ Figma Make does not ship a `tsconfig.json`. Add:
 ### Step 6 — Install + smoke test
 
 ```bash
-pnpm install   # or npm/yarn per chosen PM
-pnpm dev       # confirm "VITE ... ready" line
-pnpm typecheck # record any errors verbatim
+npm install
+npm run dev       # confirm "VITE ... ready" line
+npm run typecheck # record any errors verbatim
 ```
 
-**Do not auto-fix type errors on the port step.** They are evidence for
-the review. Only add non-semantic fixes (e.g. the `*.png` ambient
-declaration above). If dev fails to start, that *is* fixable — it's a
-blocker for the port.
+**Do auto-fix the versioned-import bug.** Make ships imports like
+`from "@radix-ui/react-dialog@1.1.6"` (the package version baked into
+the module specifier) in roughly every shadcn/ui wrapper. This is a
+hard block: Vite starts but every page request fails with
+`Failed to resolve import`. The fix is mechanical and required for the
+port to be considered runnable:
+
+```bash
+# from the project root, after copying source
+grep -rlE 'from "[^"]+@[0-9]+\.[0-9]+\.[0-9]+"' src \
+  | while IFS= read -r f; do
+      sed -i '' -E 's/"([^"]+)@[0-9]+\.[0-9]+\.[0-9]+"/"\1"/g' "$f"
+    done
+# verify zero remaining
+grep -rE '"[^"]+@[0-9]+\.[0-9]+\.[0-9]+"' src | wc -l   # → 0
+```
+
+Note this in `CONVERSION_NOTES.md` as **fixed on port** (count of files
+touched, count of imports stripped).
+
+**Do not auto-fix other type errors on the port step.** They are
+evidence for the review. Only add non-semantic fixes (e.g. the `*.png`
+ambient declaration in env.d.ts). Capture the post-strip
+`npm run typecheck` count verbatim. If dev still fails to start after
+the strip, that *is* fixable — it's a blocker for the port.
+
+**Wire SAP "72" font if referenced.** If `grep -rl "font-\['72:"`
+finds matches anywhere under `src/`, run the **figma-make-sap72-font**
+skill before considering the port runnable. The font files are
+bundled in `resources/typefaces/72-TrueType-allstyles/` and the skill
+copies + wires them in.
 
 ### Step 7 — Fill CONVERSION_NOTES.md and IMPORT_REPORT.md
 
@@ -176,7 +225,7 @@ Both files were copied from templates in Step 2. Fill the
 1. **CONVERSION_NOTES.md** — two sections:
    - §1 Resume-from-here context (via **figma-make-chat-replay**).
    - §2 Code review (via **figma-make-code-review**), including any
-     `pnpm typecheck` output.
+     `npm run typecheck` output.
 2. **IMPORT_REPORT.md** (via **figma-make-import-report**) — the
    stakeholder-facing summary. Pull findings from CONVERSION_NOTES.md
    and rewrite for a mixed audience.
@@ -207,14 +256,18 @@ chore: port <slug> — repo-level updates from Figma Make import
   resolver plugin for `figma:asset/*` imports pointing to `src/assets/`.
   If `src/assets/` doesn't exist and no code uses the prefix, leave both
   as-is; note it in review.
-- **Empty `fonts.css`.** Make sometimes ships an empty `src/styles/fonts.css`
-  while referencing a font family (e.g. SAP's "72") hundreds of times in
-  class strings. Don't delete the import; flag that the font won't load.
+- **Missing fonts.** Make often references SAP's "72" family in
+  hundreds of `font-['72:Regular',_sans-serif]` class strings without
+  shipping a `fonts.css`, an `@font-face` block, or the typeface itself.
+  Use the **figma-make-sap72-font** skill — the .ttf files are bundled
+  at `resources/typefaces/72-TrueType-allstyles/`. If a project
+  references a *different* missing font, flag it in CONVERSION_NOTES.md
+  R-items rather than guessing.
 - **Rename freeze (hard rule).** Do not rename files, folders, or
   exports during the port — not `Frame57793154.tsx`, not `EditMode-2-1/`,
   not the parallel-iteration siblings. The `src/imports/*` graph is
-  fragile and undocumented; renames are only safe after (a) `pnpm dev`
-  runs cleanly, (b) `pnpm typecheck` output is captured, and (c) there
+  fragile and undocumented; renames are only safe after (a) `npm run dev`
+  runs cleanly, (b) `npm run typecheck` output is captured, and (c) there
   is at least a smoke-level E2E or visual baseline to catch regressions.
   Renaming belongs in the refactor pass, not the port.
 - **Parallel iterations.** Watch for `FooName/` and `FooName-1/`,
@@ -222,8 +275,9 @@ chore: port <slug> — repo-level updates from Figma Make import
   same component. Types often drift between them. Typecheck will expose
   this.
 - **Safe-chain / minimum package age.** If the user's npm registry
-  proxy blocks packages below a minimum age, `pnpm install` may warn;
-  it's not a failure. Capture and move on.
+  proxy (e.g. Aikido `safe-chain`) blocks or warns on packages below
+  a minimum age, `npm install` will print a notice; it's not a
+  failure. Capture and move on.
 
 ## Examples
 
@@ -238,3 +292,8 @@ chore: port <slug> — repo-level updates from Figma Make import
 
 - **figma-make-chat-replay** — builds the resume-from-here section.
 - **figma-make-code-review** — catalogues Make-specific smells.
+- **figma-make-sap72-font** — wire the SAP "72" typeface from
+  `resources/typefaces/72-TrueType-allstyles/` when the port references
+  `font-['72:*']` classes.
+- **figma-make-import-report** — generate the stakeholder-facing
+  IMPORT_REPORT.md once the port settles.

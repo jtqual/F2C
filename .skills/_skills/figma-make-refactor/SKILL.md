@@ -12,7 +12,7 @@ dependencies:
   - figma-make-code-review
   - figma-make-type-consolidate
   - figma-make-a11y-modal
-version: "0.1.0"
+version: "0.1.1"
 ---
 
 # figma-make-refactor
@@ -32,8 +32,8 @@ Use after a `figma-make-import` run has finished and the user asks to
 Refuse to start until all of these hold. If any fails, stop and tell the
 user what's missing.
 
-- [ ] `pnpm dev` (or the project's PM equivalent) boots without errors.
-- [ ] `pnpm typecheck` output is captured in `CONVERSION_NOTES.md` §2.
+- [ ] `npm run dev` boots without errors.
+- [ ] `npm run typecheck` output is captured in `CONVERSION_NOTES.md` §2.
 - [ ] `CONVERSION_NOTES.md` R-items exist (from `figma-make-code-review`).
 - [ ] At least one smoke-level E2E, visual baseline, or screenshot set
       exists so regressions are catchable. If none, offer to add a
@@ -93,7 +93,7 @@ Mechanical but touches every import site. Do this last.
    # then sed in place once the list looks right
    ```
 
-4. After each rename: `pnpm typecheck && pnpm test`. Do not batch.
+4. After each rename: `npm run typecheck && npm test`. Do not batch.
 5. Commit per rename with the old→new name in the message.
 
 ## When the pass doesn't fit
@@ -118,3 +118,7 @@ refactoring or reimplement from the chat spec.
 - **figma-make-code-review** — the findings list this skill consumes.
 - **figma-make-type-consolidate** — pass 1.
 - **figma-make-a11y-modal** — pass 2.
+- **figma-make-sap72-font** — wire SAP "72" typography from F2C's
+  bundled fonts. If the project still falls back to `sans-serif`,
+  layout work is unreliable (computed widths shift); run this before
+  the layout pass.

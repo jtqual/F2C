@@ -95,8 +95,8 @@
 
 ## TypeScript health
 
-- `pnpm dev`: {{boots clean / boots with warnings / fails}}
-- `pnpm typecheck`: **{{N}} errors** / clean
+- `npm run dev`: {{boots clean / boots with warnings / fails}}
+- `npm run typecheck`: **{{N}} errors** / clean
 
 <!--
   If errors exist, list each in a table. Keep it brief — one-line

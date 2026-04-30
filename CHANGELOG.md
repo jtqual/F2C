@@ -29,6 +29,31 @@ git checkout clone-me && git merge --ff-only vX.Y.Z && git push
 
 ## [Unreleased]
 
+### Added
+- New skill: `figma-make-sap72-font` — wires SAP "72" typeface from
+  bundled `resources/typefaces/72-TrueType-allstyles/` when a port
+  references `font-['72:*']` class strings. Includes the canonical
+  Make-class-string ↔ TTF-file ↔ font-family-literal mapping.
+- `figma-make-import` Step 6 now performs the mechanical fix for
+  Make's versioned-import bug (`from "pkg@1.2.3"` → `from "pkg"`)
+  during the port instead of deferring to refactor; this is required
+  for dev to render anything.
+
+### Changed
+- **Standardized on npm + nvm.** AGENTS.md, README, README template,
+  and all skills now assume npm. Removed the pnpm-by-lockfile rule
+  and the historical "opted into pnpm for `real-time-trigger-proto`"
+  note.
+- `figma-make-import` Step 3 now explicitly removes
+  `pnpm-workspace.yaml`, `pnpm-lock.yaml`, and `pnpm.overrides` from
+  Make exports during the port; package-manager prompt to the user
+  is gated on a hard block (workspace protocol etc.) rather than
+  default-on.
+- All skill examples (`figma-make-refactor`, `figma-make-code-review`,
+  `figma-make-type-consolidate`) use `npm run …` commands.
+- `figma-make-code-review` checklist adds explicit items for stale
+  pnpm artifacts and missing SAP 72 wiring.
+
 ## [0.1.0] - 2026-04-29
 
 ### Added

@@ -9,7 +9,7 @@ triggers:
   - figma make bugs
   - figma make typecheck
 dependencies: []
-version: "0.1.0"
+version: "0.1.1"
 ---
 
 # figma-make-code-review
@@ -35,7 +35,7 @@ Manifest & tooling
 - [ ] tsconfig.json exists; strict; jsx: react-jsx
 - [ ] env.d.ts declares *.png / *.svg / *.jpg modules
 - [ ] .node-version matches the user's runtime pin
-- [ ] `pnpm|npm dev` boots without errors
+- [ ] `npm run dev` boots without errors
 - [ ] `tsc --noEmit` output captured (do NOT auto-fix)
 
 Code smells
@@ -60,7 +60,12 @@ UI hygiene
 
 Manifest deltas
 - [ ] Unused deps candidate list prepared (MUI, Emotion, Popper, etc.)
-- [ ] `pnpm-workspace.yaml` status (single-package — keep or delete?)
+- [ ] Stale pnpm artifacts (`pnpm-workspace.yaml`, `pnpm-lock.yaml`,
+      `pnpm.overrides` in package.json) — should be deleted during port
+      since F2C runs on npm; flag if any survived
+- [ ] SAP "72" font references without bundled fonts — if `font-['72:`
+      appears anywhere under `src/`, the **figma-make-sap72-font** skill
+      should have wired it in. If not, this is an R-item.
 ```
 
 ## How to run each check
@@ -112,7 +117,7 @@ iterations, that's drift — flag for consolidation.
 ### Typecheck
 
 ```bash
-pnpm typecheck 2>&1 | tee /tmp/make-tsc.log
+npm run typecheck 2>&1 | tee /tmp/make-tsc.log
 ```
 
 Paste the output verbatim into `CONVERSION_NOTES.md` review section.
@@ -152,7 +157,7 @@ quirks" title.
 - Absolute positioning — needs visual regression baseline first.
 - Font references — licensing decision.
 - File renames — imports graph is fragile without tests.
-- Unused deps — removing them may hide `pnpm install` drift issues.
+- Unused deps — removing them may hide `npm install` drift issues.
 - Semantic TS errors — they are evidence of iteration drift; the next
   refactor uses them as a map.
 

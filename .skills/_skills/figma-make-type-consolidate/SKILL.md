@@ -9,7 +9,7 @@ triggers:
   - fix targetcondition drift
   - figma make iteration drift
 dependencies: []
-version: "0.1.0"
+version: "0.1.1"
 ---
 
 # figma-make-type-consolidate
@@ -23,14 +23,14 @@ This skill collapses them to a single source of truth.
 
 ## When to use this skill
 
-Use when `pnpm typecheck` output (captured in `CONVERSION_NOTES.md` §2)
+Use when `npm run typecheck` output (captured in `CONVERSION_NOTES.md` §2)
 includes TS2322/TS2739 errors pointing at type mismatches across
 `src/imports/*` siblings, or when the code review flags
 "parallel-iteration drift".
 
 ## Preconditions
 
-- `pnpm dev` boots and `pnpm typecheck` output is captured.
+- `npm run dev` boots and `npm run typecheck` output is captured.
 - Git working tree is clean — this skill makes many small commits.
 - If there's no visual/smoke baseline, add one before starting.
 
@@ -90,7 +90,7 @@ For each sibling folder that declared the type:
 
 1. Delete its local `export interface TargetCondition { ... }`.
 2. Replace with `import type { TargetCondition } from '@/types/target-condition';`
-3. `pnpm typecheck` immediately. Fix call sites that relied on the
+3. `npm run typecheck` immediately. Fix call sites that relied on the
    dropped/renamed fields before moving to the next folder.
 4. Commit: `refactor(types): consolidate TargetCondition from EditMode-1`
 

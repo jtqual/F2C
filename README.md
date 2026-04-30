@@ -57,8 +57,11 @@ that automate the mechanical parts of a Figma Make handoff. When you open
 this repo in Cursor or Claude, the assistant can run these for you:
 
 - **`figma-make-import`** — takes a fresh Make export and gets it to a
-  running state (fixes the package setup, adds TypeScript config, loads
-  fonts, etc.).
+  running state (fixes the package setup, adds TypeScript config,
+  removes Make's pnpm artifacts since F2C runs on npm, etc.).
+- **`figma-make-sap72-font`** — wires SAP's "72" typeface (the family
+  most Make exports reference but don't ship) using the .ttf files
+  bundled under `resources/typefaces/`.
 - **`figma-make-chat-replay`** — reads Make's `chat.txt` and turns it into
   a clean "here's what the designer asked for" document that survives the
   handoff.
