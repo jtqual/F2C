@@ -10,7 +10,7 @@ triggers:
   - figma make summary
 dependencies:
   - figma-make-import
-version: "0.1.0"
+version: "0.1.1"
 ---
 
 # figma-make-import-report
@@ -30,7 +30,7 @@ when the user asks for an "import report", "conversion report", or
 ## Output location
 
 ```
-Code Conversion Output/Projects/<slug>/IMPORT_REPORT.md
+Code Conversion Output/Projects/<output-slug>/IMPORT_REPORT.md
 ```
 
 Always save inside the ported project directory, not at the repo root.

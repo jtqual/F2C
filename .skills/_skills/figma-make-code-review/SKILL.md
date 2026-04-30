@@ -9,7 +9,7 @@ triggers:
   - figma make bugs
   - figma make typecheck
 dependencies: []
-version: "0.1.2"
+version: "0.1.3"
 ---
 
 # figma-make-code-review
@@ -66,14 +66,8 @@ Manifest deltas
 - [ ] SAP "72" font references without bundled fonts — if `font-['72:`
       appears anywhere under `src/`, the **figma-make-sap72-font** skill
       should have wired it in. If not, this is an R-item.
-- [ ] **Emoji and non-ASCII in filenames.** Make bakes Figma "release
-      status" emoji into node names (`Banner🟢GeneralAvailability.tsx`,
-      `Tier3ToolPane🚨FlaggedForDeprecation.tsx`). Always an R-item;
-      stripping happens in the **figma-make-refactor** rename pass,
-      not at port time. Detect with:
-      ```bash
-      find src -type f -name '*.tsx' | LC_ALL=C grep -P "[^\x00-\x7F]" | wc -l
-      ```
+- [ ] Emoji and non-ASCII in filenames (Make bakes Figma "release
+      status" emoji into node names — see "How to run each check").
 ```
 
 ## How to run each check
@@ -135,6 +129,30 @@ Errors fall into recognizable buckets:
   Y still requires.
 - **TS2307 / cannot find module '*.png'** — fixed by `env.d.ts`.
 - **TS2322 / incompatible TargetCondition** — sibling type drift.
+
+### Emoji and non-ASCII in filenames
+
+Make embeds Figma "release status" emoji directly into node names —
+you'll see files like `Banner🟢GeneralAvailability.tsx` and
+`Tier3ToolPane🚨FlaggedForDeprecation.tsx` in `src/app/imports/`.
+These break editor search-by-path on some IDEs, fail terminal
+autocompletion, and look unprofessional in code review.
+
+Always an R-item. Stripping happens in the **figma-make-refactor**
+rename pass — not at port time, because the rename freeze still
+applies until typecheck is green and a visual baseline exists.
+
+Detection (portable on stock macOS — uses `/usr/bin/perl`, no GNU
+grep, no ripgrep, no Homebrew dependency):
+
+```bash
+find src -type f \( -name '*.tsx' -o -name '*.ts' \) \
+  | perl -ne 'print if /[^\x00-\x7F]/'
+```
+
+Pipe to `wc -l` for a count. The perl regex matches any byte outside
+plain ASCII (`\x00` through `\x7F`), so it catches emoji, accents,
+and any other non-ASCII character.
 
 ### Unused deps
 

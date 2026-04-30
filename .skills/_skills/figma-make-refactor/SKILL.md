@@ -12,7 +12,7 @@ dependencies:
   - figma-make-code-review
   - figma-make-type-consolidate
   - figma-make-a11y-modal
-version: "0.2.0"
+version: "0.2.1"
 ---
 
 # figma-make-refactor
@@ -80,36 +80,47 @@ Do not attempt to convert all absolute positioning in one pass. Budget
 
 Mechanical but touches every import site. Do this last.
 
-The rename pass has two jobs:
+The rename pass has two sub-passes, run in order:
 
-1. **Strip non-ASCII from filenames.** Make embeds Figma's
-   "release status" emoji into node names — you'll see files like
-   `Banner🟢GeneralAvailability.tsx`,
-   `Tier3ToolPane🚨FlaggedForDeprecation.tsx`,
-   `FlyoutList🟢GeneralAvailability-105-3338.tsx`. These break a
-   non-trivial number of editor features (search-by-path, terminal
-   autocompletion, some test runners) and they look unprofessional
-   in any code review. Strip the emoji and any other non-ASCII
-   characters from filenames as the first sub-pass. If the resulting
-   name collides with a sibling, append a stable suffix (e.g. the
-   trailing `-105-3338` Figma node ID Make already uses).
-2. **Rename Figma-node names to domain names.** `Frame57793154` →
-   `TriggerModal`, `EditMode-2-1` → `ConditionRow`, etc.
+- **Sub-pass A — Strip non-ASCII from filenames.** Make embeds
+  Figma's "release status" emoji into node names — you'll see files
+  like `Banner🟢GeneralAvailability.tsx`,
+  `Tier3ToolPane🚨FlaggedForDeprecation.tsx`,
+  `FlyoutList🟢GeneralAvailability-105-3338.tsx`. These break a
+  non-trivial number of editor features (search-by-path, terminal
+  autocompletion, some test runners) and look unprofessional in any
+  code review. Strip the emoji and any other non-ASCII characters
+  from filenames first. If the resulting name collides with a
+  sibling, append a stable suffix (e.g. the trailing `-105-3338`
+  Figma node ID Make already uses). Detect candidates with the
+  command in `figma-make-code-review` → §"Emoji and non-ASCII in
+  filenames".
 
-Steps:
+- **Sub-pass B — Rename Figma-node names to domain names.**
+  `Frame57793154` → `TriggerModal`, `EditMode-2-1` → `ConditionRow`,
+  etc. The chat transcript (via `figma-make-chat-replay`) is the
+  source for which Figma node corresponds to which UI surface.
 
-1. Build the rename map from `chat.txt` (via `figma-make-chat-replay`)
-   and any Figma node names you have. Examples:
-   `Banner🟢GeneralAvailability.tsx → Banner.tsx`,
-   `Tier3ToolPane🚨FlaggedForDeprecation.tsx → Tier3ToolPane.tsx`,
-   `Frame57793154 → TriggerModal`, `EditMode-2-1 → ConditionRow`.
-2. Write the map to `Code Conversion Output/Projects/<slug>/RENAME_MAP.md` so reviewers can
-   audit it.
+The numbered steps below apply to **both** sub-passes; run sub-pass A
+to completion (with its own commit, typecheck, test loop) before
+starting sub-pass B.
+
+Steps (per sub-pass):
+
+1. Build the rename map for this sub-pass.
+   - Sub-pass A entries: `Banner🟢GeneralAvailability.tsx → Banner.tsx`,
+     `Tier3ToolPane🚨FlaggedForDeprecation.tsx → Tier3ToolPane.tsx`,
+     etc.
+   - Sub-pass B entries: `Frame57793154 → TriggerModal`,
+     `EditMode-2-1 → ConditionRow`, etc.
+2. Write the map to
+   `Code Conversion Output/Projects/<output-slug>/RENAME_MAP.md` so
+   reviewers can audit it. Append; don't overwrite between sub-passes.
 3. Rename file by file, updating imports with a codemod:
 
    ```bash
-   # dry run
-   rg -l "from ['\"].*Frame57793154" src | xargs -I{} echo {}
+   # dry run (use `rg` if installed, else `grep -rl`)
+   grep -rl "from ['\"].*Frame57793154" src
    # then sed in place once the list looks right
    ```
 

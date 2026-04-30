@@ -44,11 +44,17 @@ F2C/
 └── .skills/                         ← the repeatable steps, written as "skills" an AI can run
 ```
 
-Each project gets the **same slug** in both trees: a Figma Make export
-at `Figma Make/Projects/<slug>/` lines up with its ported version at
-`Code Conversion Output/Projects/<slug>/`. Both trees are gitignored
-(only the `_template/` folder under each is tracked), so they're pure
-scratch space for running, tweaking, and demoing the design.
+Each project lives in two folders that share a stem: the
+**input name** under `Figma Make/Projects/` (whatever you named it —
+spaces and casing fine) and a **kebab-ascii output slug** under
+`Code Conversion Output/Projects/` (lowercase, hyphenated). For
+example, `Figma Make/Projects/AI Scoring/` lines up with
+`Code Conversion Output/Projects/ai-scoring/`. The split keeps the
+input tree readable and the output tree friendly to npm, shell, and
+git (which dislike spaces and emoji in paths). Both trees are
+gitignored (only the `_template/` folder under each is tracked), so
+they're pure scratch space for running, tweaking, and demoing the
+design.
 
 ## The skills
 
@@ -95,14 +101,15 @@ is gitignored). The short version:
 
 ## Getting started
 
-1. Drop your Figma Make export into `Figma Make/Projects/<your-slug>/`
-   (pick a short kebab-case slug — the ported version will use the same
-   one).
+1. Drop your Figma Make export into `Figma Make/Projects/<your-folder-name>/`
+   (name it whatever's readable — spaces, mixed case, even emoji are
+   fine in this tree).
 2. Open this repo in Cursor or Claude Code.
-3. Ask the assistant to "import this as a new F2C project" — it will pick
-   up the `figma-make-import` skill and walk through the port.
+3. Ask the assistant to "import this as a new F2C project" — it will
+   pick up the `figma-make-import` skill, propose a kebab-ascii output
+   slug, and walk through the port.
 4. The ported, runnable version lands in
-   `Code Conversion Output/Projects/<your-slug>/`.
+   `Code Conversion Output/Projects/<output-slug>/`.
 
 That's it. The goal is to make the boring parts boring, so the interesting
 parts — the design, the interactions, the feedback — get the attention.

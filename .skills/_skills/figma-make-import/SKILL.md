@@ -14,7 +14,7 @@ dependencies:
   - figma-make-chat-replay
   - figma-make-code-review
   - figma-make-sap72-font
-version: "0.3.0"
+version: "0.3.1"
 ---
 
 # figma-make-import
@@ -36,7 +36,7 @@ the npm + shell + git toolchain that the port runs against.
 The dropped export typically looks like:
 
 ```
-Figma Make/Projects/<slug>/
+Figma Make/Projects/<input-name>/
 ├── chat.txt                                 # raw conversation transcript
 └── <Human project name>/                    # the downloaded project
     ├── index.html
@@ -63,8 +63,8 @@ Make project into the current workspace — or says "Figma to Cursor",
 ## Preflight checks (do not skip)
 
 1. **Confirm source layout.** If `chat.txt` or the project folder is
-   missing under `Figma Make/Projects/<slug>/`, ask the user where they
-   are.
+   missing under `Figma Make/Projects/<input-name>/`, ask the user
+   where they are.
 2. **Confirm git state.** If the workspace is not a git repo, ask before
    `git init`. Use `main` as the default branch name.
 3. **Decide destination — input name preserved, output slug normalized.**
@@ -299,10 +299,10 @@ commit are repo-level changes the port surfaced — skills, templates,
 docs, fonts, etc. Suggested message for that:
 
 ```
-chore: port <slug> — repo-level updates from Figma Make import
+chore: port <output-slug> — repo-level updates from Figma Make import
 
 - skill / template / doc tweaks surfaced during the port
-- (no project source committed; lives under Code Conversion Output/Projects/<slug>/)
+- (no project source committed; lives under Code Conversion Output/Projects/<output-slug>/)
 ```
 
 ## Common pitfalls

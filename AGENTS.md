@@ -3,19 +3,26 @@
 This repo holds the machinery to port Figma Make exports into a
 runnable, assistant-friendly codebase.
 
-**Layout (input → output, mirrored slugs):**
+**Layout (input → output):**
 
-- `Figma Make/Projects/<slug>/` — the user drops a Figma Make export
-  here. **Untracked** (gitignored) except for `_template/`, which is a
-  structural placeholder with a drop-zone README.
-- `Code Conversion Output/Projects/<slug>/` — the ported, runnable
-  version of that export. **Untracked** (gitignored) except for
-  `_template/`, which holds the tracked doc standards
-  (`CONVERSION_NOTES`, `IMPORT_REPORT`, `README` templates) copied into
-  each port.
+- `Figma Make/Projects/<input-name>/` — the user drops a Figma Make
+  export here. The folder name is whatever the user picks (it can
+  contain spaces, mixed case, even emoji — that tree mirrors the
+  Make export literally). **Untracked** (gitignored) except for
+  `_template/`, which is a structural placeholder with a drop-zone
+  README.
+- `Code Conversion Output/Projects/<output-slug>/` — the ported,
+  runnable version of that export. The folder name is **always
+  kebab-ascii** (lowercase letters, digits, hyphens — no spaces, no
+  emoji). **Untracked** (gitignored) except for `_template/`, which
+  holds the tracked doc standards (`CONVERSION_NOTES`, `IMPORT_REPORT`,
+  `README` templates) copied into each port.
 
-Each project keeps the **same `<slug>`** in both trees so input and
-output line up.
+The two folder names no longer mirror exactly — intentional. The
+input name documents what the user dropped; the output slug serves
+the npm + shell + git toolchain that the port runs against. The
+`figma-make-import` skill computes the mapping at preflight #3 and
+records both names in `CONVERSION_NOTES.md`.
 
 ## Skills (agnostic / multi-ecosystem)
 

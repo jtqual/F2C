@@ -12,7 +12,7 @@ triggers:
   - wire sap 72
   - missing fonts.css
 dependencies: []
-version: "0.1.0"
+version: "0.1.1"
 ---
 
 # figma-make-sap72-font
@@ -137,7 +137,7 @@ cp ../../../resources/typefaces/72-TrueType-allstyles/72-SemiboldDuplex.ttf src/
 ```
 
 The relative path `../../../resources/typefaces/…` assumes the standard
-F2C layout (`Code Conversion Output/Projects/<slug>/`). Adjust if the
+F2C layout (`Code Conversion Output/Projects/<output-slug>/`). Adjust if the
 port lives elsewhere.
 
 ### Step 3 — Write src/styles/fonts.css
@@ -255,7 +255,7 @@ from src/styles/index.css. Computed font-family verified in dev.
 
 - **Wrong relative path.** The bundled fonts live at the F2C repo
   root, not in `node_modules/`. The path from
-  `Code Conversion Output/Projects/<slug>/` is
+  `Code Conversion Output/Projects/<output-slug>/` is
   `../../../resources/typefaces/72-TrueType-allstyles/`. If the port
   was relocated, recompute.
 

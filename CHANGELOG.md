@@ -29,6 +29,27 @@ git checkout clone-me && git merge --ff-only vX.Y.Z && git push
 
 ## [Unreleased]
 
+### Fixed
+- **Emoji-detection one-liner is now portable on stock macOS.** The
+  original `LC_ALL=C grep -P "[^\x00-\x7F]"` failed because BSD grep
+  has no `-P` flag. Replaced with `perl -ne 'print if /[^\x00-\x7F]/'`,
+  which uses `/usr/bin/perl` (always shipped with macOS, no Homebrew
+  required). Verified against `Code Conversion Output/Projects/AI Scoring/`
+  (returned 19 emoji-named files, as expected).
+- **Nested fences in the code-review checklist** would have broken
+  rendering in some Markdown parsers. Moved the detection one-liner
+  out of the checklist code block and into the "How to run each
+  check" section, where fenced bash blocks live cleanly.
+- **Slug terminology drift.** Swept all skills, AGENTS.md, README.md,
+  and `Code Conversion Output/Projects/_template/README.md` so the
+  input tree consistently uses `<input-name>` and the output tree
+  uses `<output-slug>`. Removes the leftover "same `<slug>` in both
+  trees" claim from before the kebab-ascii rule landed.
+- **Refactor rename pass — overlapping numbering.** The two "jobs" of
+  the rename pass (strip non-ASCII, then domain renames) are now
+  named **Sub-pass A** / **Sub-pass B** so they don't collide with
+  the numbered Steps 1–4 underneath. Steps apply to each sub-pass.
+
 ### Changed
 - **Slug rule clarified.** Input folder under `Figma Make/Projects/`
   keeps whatever name the user dropped (spaces, mixed case, even
