@@ -5,6 +5,8 @@ Kit version: see `.skills/_meta.yml` (optional metadata only). Human-facing copi
 Load a skill only when the task clearly requires it.
 Read the full `SKILL.md` only at that point — never preemptively.
 
+**Always-on exception:** the `language` skill applies to every user-facing response in this repo. Load it once at session start and keep it loaded; it shapes voice, not procedure.
+
 | name | description | triggers |
 |------|-------------|----------|
 | figma-make-chat-replay | Reconstruct a Figma Make `chat.txt` into a resume-from-here context doc, correcting the Make assistant's POV where it diverges from the code. | figma make chat, chat.txt, replay figma make, resume figma make, reconstruct figma make conversation, figma make transcript |
@@ -16,6 +18,7 @@ Read the full `SKILL.md` only at that point — never preemptively.
 | figma-make-a11y-modal | Add the missing a11y primitives to Figma Make modals: role=dialog, aria-modal, labelled heading, Escape-to-close, focus trap, initial focus. | figma make a11y, figma make modal accessibility, fix modal a11y, add focus trap, escape to close modal, aria-modal figma make |
 | figma-make-sap72-font | Wire SAP's "72" typeface (and 72 Mono) into a ported Figma Make project from F2C's bundled `resources/typefaces/72-TrueType-allstyles/`: copy referenced TTFs, emit fonts.css with @font-face blocks matching Make's `font-['72:Style']` literals, import from index.css. | sap 72 font, figma make font, figma make 72 font, figma make typography, 72 font missing, font 72 not loading, figma make sans-serif fallback, wire sap 72, missing fonts.css |
 | harness-upgrade | Upgrade a skills-harness installation to the latest version with native IDE discovery. | upgrade harness, update harness, migrate harness, add native discovery, enable IDE symlinks, update skills system |
+| language | Voice and register for every response in this repo: audience is non-engineer UX designers porting Figma Make exports; mirror their vocabulary, prefer plain English, defer execution detail to AGENTS.md and task skills. **Always-on:** load alongside any task skill. | intro, explain, what is, walk me through, first time, new to terminal, what does this mean, help me understand, guide, onboarding |
 | kit-release | Bump the skills-harness kit semver and keep CHANGELOG, README, AGENTS_skills.md, and _meta.yml in sync. | bump kit version, bump harness version, release skills harness, cut a harness release, skills-harness version, kit release |
 | skill-author | How to write a new SKILL.md from scratch and register it in the index. | write a skill, author a skill, new skill, add a skill |
 | skill-template | Canonical SKILL.md format with authoring notes and refactor guide. | new skill, skill format, create skill, reformat skill, convert rule |

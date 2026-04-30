@@ -30,6 +30,14 @@ git checkout clone-me && git merge --ff-only vX.Y.Z && git push
 ## [Unreleased]
 
 ### Added
+- New skill: `language` — voice/register guidance, always-on, governs
+  *how* the agent talks (not *what* it does). Audience baseline is
+  UX designers porting Figma Make exports who are new to Terminal.
+  Imported from a sibling repo and rewritten for F2C: dropped the
+  `uxpm-` name prefix, removed references to `scripts/env-check.sh`,
+  `local/`, `REPO_VERSION`, and the Homebrew-path branching that
+  don't exist here. Wired into `.skills/_index.md` (with an
+  always-on note at the top) and AGENTS.md (load at session start).
 - New skill: `figma-make-sap72-font` — wires SAP "72" typeface from
   bundled `resources/typefaces/72-TrueType-allstyles/` when a port
   references `font-['72:*']` class strings. Includes the canonical

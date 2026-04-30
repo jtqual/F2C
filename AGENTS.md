@@ -71,9 +71,14 @@ ecosystem harness blocks into this file for this repository.
 
 ## Notes for agents
 
+- **Voice.** The `language` skill is **always on** in this repo. Load
+  it at session start in addition to whatever task skill is active.
+  It governs *how* you say things (plain English, no walls of log
+  output, mirror the user's vocabulary, distinguish source export
+  from port). Default audience is a UX designer new to Terminal.
 - When asked to convert a Figma Make project, load
-  **`figma-make-import`** first; it links to the chat-replay and
-  code-review skills.
+  **`figma-make-import`** first; it links to the chat-replay,
+  code-review, and SAP-72-font skills.
 - The Figma API **cannot** fetch Figma Make projects. The only source
   is the folder the user downloads from Figma Make, which always
   contains a `chat.txt` next to the project directory.
