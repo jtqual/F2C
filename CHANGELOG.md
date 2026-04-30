@@ -29,46 +29,7 @@ git checkout clone-me && git merge --ff-only vX.Y.Z && git push
 
 ## [Unreleased]
 
-### Fixed
-- **Emoji-detection one-liner is now portable on stock macOS.** The
-  original `LC_ALL=C grep -P "[^\x00-\x7F]"` failed because BSD grep
-  has no `-P` flag. Replaced with `perl -ne 'print if /[^\x00-\x7F]/'`,
-  which uses `/usr/bin/perl` (always shipped with macOS, no Homebrew
-  required). Verified against `Code Conversion Output/Projects/AI Scoring/`
-  (returned 19 emoji-named files, as expected).
-- **Nested fences in the code-review checklist** would have broken
-  rendering in some Markdown parsers. Moved the detection one-liner
-  out of the checklist code block and into the "How to run each
-  check" section, where fenced bash blocks live cleanly.
-- **Slug terminology drift.** Swept all skills, AGENTS.md, README.md,
-  and `Code Conversion Output/Projects/_template/README.md` so the
-  input tree consistently uses `<input-name>` and the output tree
-  uses `<output-slug>`. Removes the leftover "same `<slug>` in both
-  trees" claim from before the kebab-ascii rule landed.
-- **Refactor rename pass — overlapping numbering.** The two "jobs" of
-  the rename pass (strip non-ASCII, then domain renames) are now
-  named **Sub-pass A** / **Sub-pass B** so they don't collide with
-  the numbered Steps 1–4 underneath. Steps apply to each sub-pass.
-
-### Changed
-- **Slug rule clarified.** Input folder under `Figma Make/Projects/`
-  keeps whatever name the user dropped (spaces, mixed case, even
-  emoji); output slug under `Code Conversion Output/Projects/` is
-  **always kebab-ascii**. The two trees no longer mirror exactly —
-  intentional — because shell/npm/CI pain from spaces and emoji in
-  output paths was recurring. `figma-make-import` preflight #3
-  enforces this with an explicit input-name → output-slug mapping
-  shown to the user before anything is created. AGENTS.md
-  Conventions block updated; existing ports are not retroactively
-  renamed.
-- **Refactor rename pass strips non-ASCII from filenames.** Make
-  embeds Figma release-status emoji into node names
-  (`Banner🟢GeneralAvailability.tsx`,
-  `Tier3ToolPane🚨FlaggedForDeprecation.tsx`); these are always an
-  R-item in the code review and always stripped during the rename
-  sub-pass of `figma-make-refactor`. Not stripped at port time
-  because the rename freeze still applies until typecheck is green
-  and a visual baseline exists.
+## [0.2.0] - 2026-04-30
 
 ### Added
 - New skill: `language` — voice/register guidance, always-on, governs
@@ -92,16 +53,64 @@ git checkout clone-me && git merge --ff-only vX.Y.Z && git push
 - **Standardized on npm + nvm.** AGENTS.md, README, README template,
   and all skills now assume npm. Removed the pnpm-by-lockfile rule
   and the historical "opted into pnpm for `real-time-trigger-proto`"
-  note.
-- `figma-make-import` Step 3 now explicitly removes
+  note. `figma-make-import` Step 3 now explicitly removes
   `pnpm-workspace.yaml`, `pnpm-lock.yaml`, and `pnpm.overrides` from
-  Make exports during the port; package-manager prompt to the user
-  is gated on a hard block (workspace protocol etc.) rather than
-  default-on.
-- All skill examples (`figma-make-refactor`, `figma-make-code-review`,
-  `figma-make-type-consolidate`) use `npm run …` commands.
+  Make exports during the port; the package-manager prompt to the
+  user is gated on a hard block (workspace protocol etc.) rather
+  than default-on. All skill examples (`figma-make-refactor`,
+  `figma-make-code-review`, `figma-make-type-consolidate`) use
+  `npm run …` commands.
+- **Slug rule clarified.** Input folder under `Figma Make/Projects/`
+  keeps whatever name the user dropped (spaces, mixed case, even
+  emoji); output slug under `Code Conversion Output/Projects/` is
+  **always kebab-ascii**. The two trees no longer mirror exactly —
+  intentional — because shell/npm/CI pain from spaces and emoji in
+  output paths was recurring. `figma-make-import` preflight #3
+  enforces this with an explicit input-name → output-slug mapping
+  shown to the user before anything is created. AGENTS.md
+  Conventions block updated; existing ports are not retroactively
+  renamed.
+- **Refactor rename pass strips non-ASCII from filenames.** Make
+  embeds Figma release-status emoji into node names
+  (`Banner🟢GeneralAvailability.tsx`,
+  `Tier3ToolPane🚨FlaggedForDeprecation.tsx`); these are always an
+  R-item in the code review and always stripped during the rename
+  sub-pass of `figma-make-refactor`. Not stripped at port time
+  because the rename freeze still applies until typecheck is green
+  and a visual baseline exists.
 - `figma-make-code-review` checklist adds explicit items for stale
-  pnpm artifacts and missing SAP 72 wiring.
+  pnpm artifacts, missing SAP 72 wiring, and emoji-in-filenames.
+
+### Fixed
+- **Emoji-detection one-liner is portable on stock macOS.** The first
+  draft used `LC_ALL=C grep -P "[^\x00-\x7F]"` which fails on BSD
+  grep (no `-P` flag). Replaced with
+  `perl -ne 'print if /[^\x00-\x7F]/'`, which uses `/usr/bin/perl`
+  (always shipped with macOS, no Homebrew required). Verified
+  against `Code Conversion Output/Projects/AI Scoring/` (returned
+  the expected 19 emoji-named files).
+- **Nested fences in the code-review checklist** would have broken
+  rendering in some Markdown parsers. Moved the detection one-liner
+  out of the checklist code block and into the "How to run each
+  check" section.
+- **Slug terminology drift.** Swept all skills, AGENTS.md, README.md,
+  and `Code Conversion Output/Projects/_template/README.md` so the
+  input tree consistently uses `<input-name>` and the output tree
+  uses `<output-slug>`. Removes the leftover "same `<slug>` in both
+  trees" claim from before the kebab-ascii rule landed.
+- **Refactor rename pass — overlapping numbering.** The two "jobs"
+  of the rename pass (strip non-ASCII, then domain renames) are now
+  named **Sub-pass A** / **Sub-pass B** so they don't collide with
+  the numbered Steps 1–4 underneath. Steps apply to each sub-pass.
+
+### Skill versions
+- `figma-make-import` 0.1.0 → 0.3.1
+- `figma-make-refactor` 0.1.0 → 0.2.1
+- `figma-make-code-review` 0.1.0 → 0.1.3
+- `figma-make-type-consolidate` 0.1.0 → 0.1.1
+- `figma-make-import-report` 0.1.0 → 0.1.1
+- `figma-make-sap72-font` 0.1.1 (new)
+- `language` 1.0.1 (new)
 
 ## [0.1.0] - 2026-04-29
 
@@ -111,5 +120,6 @@ git checkout clone-me && git merge --ff-only vX.Y.Z && git push
 - Two-branch release model: `main` (development trunk) and `clone-me` (stable, end-user clone target).
 - `CHANGELOG.md` and semantic versioning policy.
 
-[Unreleased]: https://github.com/jtqual/F2C/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/jtqual/F2C/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/jtqual/F2C/releases/tag/v0.2.0
 [0.1.0]: https://github.com/jtqual/F2C/releases/tag/v0.1.0
